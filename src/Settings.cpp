@@ -6,6 +6,7 @@
 
 #include <QtDBus/QDBusContext>
 #include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusConnection>
 #include <algorithm>
 #include <syslog.h>
 
@@ -27,9 +28,17 @@ namespace aperture {
 
                 auto value = provider->read(_namespace, key);
                 if (!value.isNull()) {
-                    //auto reply = portal->message().createReply(QVariant::fromValue(QDBusVariant(value)));
+                    auto reply = portal->message().createReply(QVariant::fromValue(QDBusVariant(value)));
+                    QDBusConnection::sessionBus().send(reply);
+                    return;
                 }
             }
         }
+        // If we got here, we don't have the requested property.
+
+        syslog(LOG_DEBUG, "Read property missing %s %s", _namespace.toStdString().c_str(), key.toStdString().c_str());
+
+        auto reply = portal->message().createErrorReply(QDBusError::UnknownProperty, QStringLiteral("Property not found"));
+        QDBusConnection::sessionBus().send(reply);
     }
 } // aperture
