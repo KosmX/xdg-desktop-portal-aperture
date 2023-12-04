@@ -16,7 +16,7 @@ namespace aperture {
 
     bool namespaceContains(const QStringList& namespaces, const QString& _namespace) {
         return std::any_of(namespaces.begin(), namespaces.end(), [&](const auto &item) {
-            return item.startsWith(_namespace); // TODO: check spec
+            return item.isEmpty() || item.startsWith(_namespace.left(item.length())); // the spec isn't clear, soo maybe?
         });
     }
 
