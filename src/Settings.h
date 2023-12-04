@@ -40,11 +40,11 @@ namespace aperture {
         Q_DISABLE_COPY_MOVE(Settings);
 
     public:
-        Settings(DesktopPortal* parent, std::unique_ptr<QSettings>&& settings);
+        Settings(DesktopPortal* parent);
         ~Settings() override = default;
 
         [[nodiscard]] uint version() const {
-            return 2;
+            return 1;
         }
 
         [[nodiscard]] const QMap<QString, QVariant>& getSettings() const {
@@ -66,7 +66,7 @@ namespace aperture {
 
     private:
         DesktopPortal* portal;
-        std::vector<std::unique_ptr<SettingsProvider>> providers;
+        std::vector<std::unique_ptr<SettingsProvider>> providers{};
     };
 
 } // aperture

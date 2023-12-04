@@ -11,15 +11,14 @@
 #include <QSettings>
 #include <memory>
 
-namespace aperture {
 
-    class Settings;
+namespace aperture {
 
     class DesktopPortal : public QObject , public QDBusContext {
         Q_OBJECT
-        Q_DISABLE_COPY_MOVE(DesktopPortal)
+        Q_DISABLE_COPY_MOVE(DesktopPortal);
+
     private:
-        Settings* settings = nullptr;
         std::unique_ptr<QSettings> settingsFile = std::make_unique<QSettings>();
         std::unique_ptr<QMap<QString, QVariant>> config = std::make_unique<QMap<QString, QVariant>>();
     public:

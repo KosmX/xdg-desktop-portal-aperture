@@ -3,6 +3,7 @@
 //
 
 #include "Settings.h"
+#include "FreedesktopProvider.h"
 
 #include <QtDBus/QDBusContext>
 #include <QtDBus/QDBusMessage>
@@ -19,8 +20,9 @@ namespace aperture {
     }
 
 
-    Settings::Settings(DesktopPortal *parent, std::unique_ptr<QSettings> &&settings): QDBusAbstractAdaptor(parent), portal(parent) {
+    Settings::Settings(DesktopPortal *parent): QDBusAbstractAdaptor(parent), portal(parent) {
 
+        providers.push_back(std::make_unique<FreedesktopProvider>(*this));
     }
 
     void Settings::Read(const QString &_namespace, const QString &key) {

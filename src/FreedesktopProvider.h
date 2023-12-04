@@ -15,7 +15,7 @@ namespace aperture {
         Q_DISABLE_COPY_MOVE(FreedesktopProvider);
 
     public:
-        FreedesktopProvider(Settings& settings);
+        explicit FreedesktopProvider(Settings& settings);
 
         QString getNamespace() override;
         QVariant read(const QString &_namespace, const QString &key) override;
