@@ -12,12 +12,14 @@ namespace aperture {
 
     class FreedesktopProvider : public SettingsProvider {
         Q_OBJECT
-        Q_DISABLE_COPY_MOVE(FreedesktopProvider)
+        Q_DISABLE_COPY_MOVE(FreedesktopProvider);
 
     public:
+        FreedesktopProvider(Settings& settings);
+
         QString getNamespace() override;
         QVariant read(const QString &_namespace, const QString &key) override;
-        QMap<QString, QVariantMap> readAll(const QStringList &namespaces) override
+        QMap<QString, QVariantMap> readAll(const QStringList &namespaces) override;
 
     };
 
