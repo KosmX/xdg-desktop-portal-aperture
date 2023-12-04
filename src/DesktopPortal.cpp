@@ -5,6 +5,10 @@
 #include "DesktopPortal.h"
 #include "Settings.h"
 
-aperture::DesktopPortal::DesktopPortal() {
+aperture::DesktopPortal::DesktopPortal() = default;
 
+
+
+const std::unique_ptr<QSettings> &aperture::DesktopPortal::getSettings() {
+    return settingsFile;
 }

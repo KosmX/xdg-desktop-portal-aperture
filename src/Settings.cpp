@@ -12,9 +12,14 @@
 
 namespace aperture {
 
+    bool namespaceContains(const QStringList& namespaces, const QString& _namespace) {
+        return std::any_of(namespaces.begin(), namespaces.end(), [&](const auto &item) {
+            return item.startsWith(_namespace); // TODO: check spec
+        });
+    }
 
 
-    Settings::Settings(DesktopPortal *parent, std::unique_ptr<QSettings> &&settings): QDBusAbstractAdaptor(parent), settings(std::move(settings)), portal(parent) {
+    Settings::Settings(DesktopPortal *parent, std::unique_ptr<QSettings> &&settings): QDBusAbstractAdaptor(parent), portal(parent) {
 
     }
 
@@ -24,7 +29,7 @@ namespace aperture {
         bool messageSent = false;
 
         for(auto& provider : providers) {
-            if (provider->group().startsWith(_namespace)) {
+            if (provider->getNamespace().startsWith(_namespace)) {
 
                 auto value = provider->read(_namespace, key);
                 if (!value.isNull()) {
@@ -39,6 +44,21 @@ namespace aperture {
         syslog(LOG_DEBUG, "Read property missing %s %s", _namespace.toStdString().c_str(), key.toStdString().c_str());
 
         auto reply = portal->message().createErrorReply(QDBusError::UnknownProperty, QStringLiteral("Property not found"));
+        QDBusConnection::sessionBus().send(reply);
+    }
+
+    void Settings::ReadAll(const QStringList &namespaces) {
+        syslog(LOG_DEBUG, "ReadAll %s", namespaces.join(", ").toStdString().c_str());
+
+        QMap<QString, QVariantMap> result;
+
+        for(auto& provider : providers) {
+            if (namespaceContains(namespaces, provider->getNamespace())) {
+                result.insert(provider->readAll(namespaces));
+            }
+        }
+
+        auto reply = portal->message().createReply(QVariant::fromValue(result));
         QDBusConnection::sessionBus().send(reply);
     }
 } // aperture

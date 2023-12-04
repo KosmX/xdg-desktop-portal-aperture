@@ -22,7 +22,7 @@ namespace aperture {
         Q_DISABLE_COPY_MOVE(SettingsProvider)
         ~SettingsProvider() override = default;
 
-        virtual QString group() = 0;
+        virtual QString getNamespace() = 0;
         virtual QVariant read(const QString& _namespace, const QString& key) = 0;
         virtual QMap<QString, QVariantMap> readAll(const QStringList& namespaces) = 0;
     };
@@ -42,23 +42,23 @@ namespace aperture {
         }
 
         [[nodiscard]] const std::unique_ptr<QSettings>& getSettings() const {
-            return settings;
+            return portal->getSettings();
         }
 
         [[nodiscard]] const DesktopPortal* getPortal() const {
             return portal;
         }
 
-    public Q_SLOTS:
-        //void ReadAll(const QStringList& namespaces);
+    public slots:
+        void ReadAll(const QStringList& namespaces);
 
         void Read(const QString& _namespace, const QString& key);
 
-    Q_SIGNALS:
+    signals:
+        // Before invoking this, settings should be already updated.
         void SettingsChanged(const QString& _namespace, const QString& key, const QDBusVariant& newValue);
 
     private:
-        std::unique_ptr<QSettings> settings;
         DesktopPortal* portal;
         std::vector<std::unique_ptr<SettingsProvider>> providers;
 
