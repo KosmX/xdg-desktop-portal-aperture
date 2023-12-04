@@ -14,9 +14,10 @@ int main(int argc, char *argv[])
 
     syslog(LOG_DEBUG, "Starting daemon");
 
-
-
     QCoreApplication a(argc, argv);
+
+    QCoreApplication::setOrganizationDomain("xdg-desktop-portal-aperture");
+    QCoreApplication::setApplicationName("aperture");
 
 
     syslog(LOG_INFO, "Entering event loop");
