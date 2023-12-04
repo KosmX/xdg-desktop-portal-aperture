@@ -10,6 +10,7 @@
 #include <QtDBus/QDBusConnection>
 #include <algorithm>
 #include <syslog.h>
+#include <QtDBus/QDBusMetaType>
 
 namespace aperture {
 
@@ -23,6 +24,8 @@ namespace aperture {
     Settings::Settings(DesktopPortal *parent): QDBusAbstractAdaptor(parent), portal(parent) {
 
         providers.push_back(std::make_unique<FreedesktopProvider>(*this));
+
+        qDBusRegisterMetaType<QMap<QString, QVariantMap>>();
     }
 
     void Settings::Read(const QString &_namespace, const QString &key) {
