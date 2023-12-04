@@ -16,6 +16,8 @@
 
 namespace aperture {
 
+    class Settings;
+
     class SettingsProvider : public QObject {
         Q_OBJECT
     public:
@@ -25,6 +27,10 @@ namespace aperture {
         virtual QString getNamespace() = 0;
         virtual QVariant read(const QString& _namespace, const QString& key) = 0;
         virtual QMap<QString, QVariantMap> readAll(const QStringList& namespaces) = 0;
+
+    protected:
+        SettingsProvider(Settings& settings): settings{settings} {};
+        const Settings& settings;
     };
 
     class Settings : public QDBusAbstractAdaptor {
@@ -41,8 +47,8 @@ namespace aperture {
             return 2;
         }
 
-        [[nodiscard]] const std::unique_ptr<QSettings>& getSettings() const {
-            return portal->getSettings();
+        [[nodiscard]] const QMap<QString, QVariant>& getSettings() const {
+            return *(portal->getSettings());
         }
 
         [[nodiscard]] const DesktopPortal* getPortal() const {
@@ -61,7 +67,6 @@ namespace aperture {
     private:
         DesktopPortal* portal;
         std::vector<std::unique_ptr<SettingsProvider>> providers;
-
     };
 
 } // aperture
