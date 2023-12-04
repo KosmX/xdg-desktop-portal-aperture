@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QtDBus/QDBusContext>
 #include <QSettings>
+#include <memory>
 
 namespace aperture {
 
@@ -19,10 +20,11 @@ namespace aperture {
         Q_DISABLE_COPY_MOVE(DesktopPortal)
     private:
         Settings* settings = nullptr;
-        std::unique_ptr<QSettings> settingsFile;
+        std::unique_ptr<QSettings> settingsFile = std::make_unique<QSettings>();
+        std::unique_ptr<QMap<QString, QVariant>> config = std::make_unique<QMap<QString, QVariant>>();
     public:
         DesktopPortal();
-        const std::unique_ptr<QSettings> &getSettings();
+        const std::unique_ptr<QMap<QString, QVariant>> &getSettings();
 
     //public slots:
 
