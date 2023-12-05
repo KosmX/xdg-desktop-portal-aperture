@@ -27,8 +27,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("aperture");
 
 
-    syslog(LOG_INFO, "Entering event loop");
-
     auto connection = QDBusConnection::sessionBus();
     if (!connection.isConnected()) {
         syslog(LOG_ERR, "Can't connect to session bus");
@@ -44,6 +42,8 @@ int main(int argc, char *argv[])
         syslog(LOG_ERR, "Can't register service");
         return EXIT_FAILURE;
     }
+
+    syslog(LOG_INFO, "Entering event loop");
 
     int r = a.exec();
 
