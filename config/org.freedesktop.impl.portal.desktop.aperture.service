@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.freedesktop.impl.portal.desktop.aperture
+Exec=/usr/lib/xdg-desktop-portal-aperture
+SystemdService=xdg-desktop-portal-aperture.service

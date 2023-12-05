@@ -22,5 +22,9 @@ target_link_libraries(xdg-desktop-portal-aperture Qt${QT_VERSION_MAJOR}::Core Qt
 include(GNUInstallDirs)
 install(TARGETS xdg-desktop-portal-aperture
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+
+install(FILES "config/org.freedesktop.impl.portal.desktop.aperture.service" DESTINATION "/usr/share/dbus-1/services")
+install(FILES "config/xdg-desktop-portal-aperture.service" DESTINATION "/usr/lib/systemd/user")
+install(FILES "config/aperture.portal" DESTINATION "/usr/share/xdg-desktop-portal/portals")

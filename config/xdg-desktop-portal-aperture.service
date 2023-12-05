@@ -1,0 +1,10 @@
+[Unit]
+Description=xdg-desktop-portal backend for configuration, completely DE independent.
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.impl.portal.desktop.aperture
+ExecStart=/usr/lib/xdg-desktop-portal-aperture
+Restart=on-failure
