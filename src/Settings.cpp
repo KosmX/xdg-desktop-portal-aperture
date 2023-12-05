@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "FreedesktopProvider.h"
 #include "KdeProvider.h"
+#include "GnomeDarkModeProvider.h"
 
 #include <QtDBus/QDBusContext>
 #include <QtDBus/QDBusMessage>
@@ -18,6 +19,7 @@ namespace aperture {
     bool namespaceContains(const QStringList &namespaces, const QString &_namespace) {
         return std::any_of(namespaces.begin(), namespaces.end(), [&](const auto &item) {
             return item.isEmpty() ||
+                   item.endsWith("*") && _namespace.startsWith(item.left(item.size() - 1)) ||
                    item.startsWith(_namespace.left(item.length())); // the spec isn't clear, soo maybe?
         });
     }
@@ -27,6 +29,7 @@ namespace aperture {
 
         providers.push_back(std::make_unique<FreedesktopProvider>(*this));
         providers.push_back(std::make_unique<KdeProvider>(*this));
+        providers.push_back(std::make_unique<GnomeDarkModeProvider>(*this, dynamic_cast<FreedesktopProvider*>(providers[0].get())));
 
         qDBusRegisterMetaType<QMap<QString, QVariantMap>>();
     }

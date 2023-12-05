@@ -107,14 +107,20 @@ namespace aperture {
     }
 
     void FreedesktopProvider::onSettingsChanged(const std::unique_ptr<QConfig> &oldSettings, const std::unique_ptr<QConfig> &newSettings) {
+        bool settingsChanged = false;
         if (newSettings->value(u"general"_s).contains(u"colorScheme"_s) && oldSettings->value(u"general"_s).value(u"colorScheme"_s) != newSettings->value(u"general"_s).value(u"colorScheme"_s)
         || newSettings->value(u"Colors:Window"_s).contains(u"BackgroundNormal"_s) && oldSettings->value(u"Colors:Window"_s).value(u"BackgroundNormal"_s) != newSettings->value(u"Colors:Window"_s).value(u"BackgroundNormal"_s)) {
             settings.emitSettingsChanged(getNamespace(), colorScheme, read(getNamespace(), colorScheme));
+            settingsChanged = true;
         }
 
         if (newSettings->value(general).contains(u"accentColor"_s) && oldSettings->value(general).value(u"accentColor"_s) != newSettings->value(general).value(u"accentColor"_s)
         || newSettings->value(u"Colors:Selection"_s).contains(u"BackgroundNormal"_s) && oldSettings->value(u"Colors:Selection"_s).value(u"BackgroundNormal"_s) != newSettings->value(u"Colors:Selection"_s).value(u"BackgroundNormal"_s)) {
             settings.emitSettingsChanged(getNamespace(), accentColor, read(getNamespace(), accentColor));
+            settingsChanged = true;
         }
+
+
+        if (settingsChanged) this->settingsChanged();
     }
 } // aperture

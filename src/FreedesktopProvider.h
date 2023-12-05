@@ -24,6 +24,9 @@ namespace aperture {
 
     private slots:
         void onSettingsChanged(const std::unique_ptr<QConfig>& oldSettings, const std::unique_ptr<QConfig>& newSettings);
+
+    signals:
+        void settingsChanged();
     };
 
 } // aperture
