@@ -14,7 +14,8 @@ namespace aperture {
         Q_OBJECT;
 
     public:
-        KdeProvider(Settings& parent) : SettingsProvider(parent) {}
+        KdeProvider(Settings& parent);
+        ~KdeProvider() override;
 
         QString getNamespace() override final;
 
@@ -22,6 +23,8 @@ namespace aperture {
 
         QMap<QString, QVariantMap> readAll(const QStringList &namespaces) override;
 
+    private slots:
+        void onSettingChanged(const QString& ns, const QString& key, const QVariant& oldValue, const QVariant& newValue);
     };
 
 } // aperture

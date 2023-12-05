@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QtDBus/QDBusContext>
 #include <QSettings>
+#include <QFileSystemWatcher>
 #include <memory>
 
 using QConfig = QMap<QString, QVariantMap>;
@@ -22,16 +23,24 @@ namespace aperture {
     private:
         std::unique_ptr<QSettings> settingsFile = std::make_unique<QSettings>();
         std::unique_ptr<QConfig> config;
+
+        std::unique_ptr<QFileSystemWatcher> watcher = std::make_unique<QFileSystemWatcher>(this);
     public:
         DesktopPortal();
+        ~DesktopPortal() override;
         const std::unique_ptr<QConfig> &getSettings();
 
         static std::unique_ptr<QConfig> qSettingsToConfig(QSettings& settings);
 
     //public slots:
 
+    private slots:
+        void onConfigChanged(const QString& path);
+
     signals:
-        void settingsChanged(const std::unique_ptr<QSettings>& oldSettings, const std::unique_ptr<QSettings>& newSettings);
+        void settingsChanged(const std::unique_ptr<QConfig>& oldSettings, const std::unique_ptr<QConfig>& newSettings);
+
+        void settingChanged(const QString& ns, const QString& key, const QVariant& oldValue, const QVariant& newValue);
 
     };
 

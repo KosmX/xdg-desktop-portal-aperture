@@ -4,6 +4,7 @@
 
 #include "DesktopPortal.h"
 #include "Settings.h"
+#include <syslog.h>
 
 #include <QLatin1StringView>
 
@@ -13,6 +14,10 @@ aperture::DesktopPortal::DesktopPortal(): config(qSettingsToConfig(*settingsFile
     
     // copy the config file
     // Copying the file is necessary for making diffs
+
+    watcher->addPath(settingsFile->fileName());
+
+    connect(watcher.get(), &QFileSystemWatcher::fileChanged, this, &DesktopPortal::onConfigChanged);
 };
 
 
@@ -37,7 +42,6 @@ std::unique_ptr<QConfig> aperture::DesktopPortal::qSettingsToConfig(QSettings &s
         QMap<QString, QVariant> ns;
         for (auto& subkey : settings.childKeys()) {
             ns[subkey] = settings.value(subkey).toStringList().join(',');
-            printf("%s\n", settings.value(subkey).toStringList().join(',').toStdString().c_str());
         }
 
         config->insert(group, ns);
@@ -45,4 +49,45 @@ std::unique_ptr<QConfig> aperture::DesktopPortal::qSettingsToConfig(QSettings &s
     }
 
     return config;
+}
+
+void aperture::DesktopPortal::onConfigChanged(const QString &path) {
+    syslog(LOG_INFO, "Config file changed, reloading and sending signals");
+    auto oldSettings = std::move(config);
+    settingsFile->sync();
+    config = qSettingsToConfig(*settingsFile);
+
+    emit settingsChanged(oldSettings, config);
+
+
+    // Diffing config and find changes
+    for (auto& newNamespace : config->keys()) {
+        auto oldGroup = oldSettings->value(newNamespace);
+        auto newGroup = config->value(newNamespace);
+        for (auto& key : newGroup.keys()) {
+            auto oldValue = oldGroup.value(key);
+            auto newValue = newGroup.value(key);
+            if (oldValue != newValue) {
+                emit settingChanged(newNamespace, key, oldValue, newValue);
+            }
+        }
+        for (auto& key : oldGroup.keys()) {
+            if (!newGroup.contains(key)) {
+                emit settingChanged(newNamespace, key, oldGroup.value(key), QVariant{});
+            }
+        }
+    }
+    for (auto& oldNamespace : oldSettings->keys()) {
+        if (!config->contains(oldNamespace)) {
+            auto oldGroup = oldSettings->value(oldNamespace);
+            for (auto& key : oldGroup.keys()) {
+                emit settingChanged(oldNamespace, key, oldGroup.value(key), QVariant{});
+            }
+        }
+    }
+
+}
+
+aperture::DesktopPortal::~DesktopPortal() {
+    disconnect(watcher.get(), &QFileSystemWatcher::fileChanged, this, &DesktopPortal::onConfigChanged); // clean-up
 }

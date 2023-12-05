@@ -15,14 +15,15 @@
 
 namespace aperture {
 
-    bool namespaceContains(const QStringList& namespaces, const QString& _namespace) {
+    bool namespaceContains(const QStringList &namespaces, const QString &_namespace) {
         return std::any_of(namespaces.begin(), namespaces.end(), [&](const auto &item) {
-            return item.isEmpty() || item.startsWith(_namespace.left(item.length())); // the spec isn't clear, soo maybe?
+            return item.isEmpty() ||
+                   item.startsWith(_namespace.left(item.length())); // the spec isn't clear, soo maybe?
         });
     }
 
 
-    Settings::Settings(DesktopPortal *parent): QDBusAbstractAdaptor(parent), portal(parent) {
+    Settings::Settings(DesktopPortal *parent) : QDBusAbstractAdaptor(parent), portal(parent) {
 
         providers.push_back(std::make_unique<FreedesktopProvider>(*this));
         providers.push_back(std::make_unique<KdeProvider>(*this));
@@ -35,7 +36,7 @@ namespace aperture {
 
         bool messageSent = false;
 
-        for(auto& provider : providers) {
+        for (auto &provider: providers) {
             if (_namespace.startsWith(provider->getNamespace())) {
 
                 auto value = provider->read(_namespace, key);
@@ -50,7 +51,8 @@ namespace aperture {
 
         syslog(LOG_DEBUG, "Read property missing %s %s", _namespace.toStdString().c_str(), key.toStdString().c_str());
 
-        auto reply = portal->message().createErrorReply(QDBusError::UnknownProperty, QStringLiteral("Property not found"));
+        auto reply = portal->message().createErrorReply(QDBusError::UnknownProperty,
+                                                        QStringLiteral("Property not found"));
         QDBusConnection::sessionBus().send(reply);
     }
 
@@ -59,7 +61,7 @@ namespace aperture {
 
         QMap<QString, QVariantMap> result;
 
-        for(auto& provider : providers) {
+        for (auto &provider: providers) {
             if (namespaceContains(namespaces, provider->getNamespace())) {
                 result.insert(provider->readAll(namespaces));
             }
@@ -67,5 +69,10 @@ namespace aperture {
 
         auto reply = portal->message().createReply(QVariant::fromValue(result));
         QDBusConnection::sessionBus().send(reply);
+    }
+
+    void Settings::emitSettingsChanged(const QString &_namespace, const QString &key, const QVariant &newValue) {
+        syslog(LOG_DEBUG, "Settings changed %s %s", _namespace.toStdString().c_str(), key.toStdString().c_str());
+        emit SettingsChanged(_namespace, key, QDBusVariant(newValue));
     }
 } // aperture

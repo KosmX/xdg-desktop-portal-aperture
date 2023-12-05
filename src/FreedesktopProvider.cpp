@@ -47,6 +47,7 @@ const QDBusArgument& operator>>(const QDBusArgument& dbus, ColorArray& array) {
 
 namespace aperture {
 
+    static constexpr auto general = "general"_L1;
 
     static constexpr auto colorScheme = "color-scheme"_L1;
     static constexpr auto accentColor = "accent-color"_L1;
@@ -98,5 +99,22 @@ namespace aperture {
 
     FreedesktopProvider::FreedesktopProvider(Settings &settings) : SettingsProvider(settings) {
         qDBusRegisterMetaType<ColorArray>();
+        connect(settings.getPortal(), &DesktopPortal::settingsChanged, this, &FreedesktopProvider::onSettingsChanged);
+    }
+
+    FreedesktopProvider::~FreedesktopProvider() {
+        disconnect(settings.getPortal(), &DesktopPortal::settingsChanged, this, &FreedesktopProvider::onSettingsChanged);
+    }
+
+    void FreedesktopProvider::onSettingsChanged(const std::unique_ptr<QConfig> &oldSettings, const std::unique_ptr<QConfig> &newSettings) {
+        if (newSettings->value(u"general"_s).contains(u"colorScheme"_s) && oldSettings->value(u"general"_s).value(u"colorScheme"_s) != newSettings->value(u"general"_s).value(u"colorScheme"_s)
+        || newSettings->value(u"Colors:Window"_s).contains(u"BackgroundNormal"_s) && oldSettings->value(u"Colors:Window"_s).value(u"BackgroundNormal"_s) != newSettings->value(u"Colors:Window"_s).value(u"BackgroundNormal"_s)) {
+            settings.emitSettingsChanged(getNamespace(), colorScheme, read(getNamespace(), colorScheme));
+        }
+
+        if (newSettings->value(general).contains(u"accentColor"_s) && oldSettings->value(general).value(u"accentColor"_s) != newSettings->value(general).value(u"accentColor"_s)
+        || newSettings->value(u"Colors:Selection"_s).contains(u"BackgroundNormal"_s) && oldSettings->value(u"Colors:Selection"_s).value(u"BackgroundNormal"_s) != newSettings->value(u"Colors:Selection"_s).value(u"BackgroundNormal"_s)) {
+            settings.emitSettingsChanged(getNamespace(), accentColor, read(getNamespace(), accentColor));
+        }
     }
 } // aperture

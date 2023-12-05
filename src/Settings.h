@@ -32,7 +32,7 @@ namespace aperture {
 
     protected:
         SettingsProvider(Settings& settings): settings{settings} {};
-        const Settings& settings;
+        Settings& settings;
     };
 
     class Settings : public QDBusAbstractAdaptor {
@@ -56,6 +56,9 @@ namespace aperture {
         [[nodiscard]] const DesktopPortal* getPortal() const {
             return portal;
         }
+
+        // This can be used by providers to emit the signal.
+        void emitSettingsChanged(const QString& _namespace, const QString& key, const QVariant& newValue);
 
     public slots:
         void ReadAll(const QStringList& namespaces);
