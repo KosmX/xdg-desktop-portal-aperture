@@ -33,11 +33,11 @@ void SyslogMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 int main(int argc, char *argv[])
 {
 
-    //*   // commented out for debugging :)
-    if (daemon(false, false) != 0) {
-        perror("daemon");
-        exit(EXIT_FAILURE);
-    }//*/
+    // close all file descriptors and chdir but no fork
+    close(0);
+    close(1);
+    close(2);
+    chdir("/");
 
 
     openlog("xdg-desktop-portal-aperture", LOG_PID, LOG_DAEMON);
