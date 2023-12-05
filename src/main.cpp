@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     auto connection = QDBusConnection::sessionBus();
     if (!connection.isConnected()) {
         syslog(LOG_ERR, "Can't connect to session bus");
+        closelog();
         return EXIT_FAILURE;
     }
 
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
     connection.registerObject("/org/freedesktop/portal/desktop", &portal);
     if(!connection.registerService("org.freedesktop.impl.portal.desktop.aperture")) {
         syslog(LOG_ERR, "Can't register service");
+        closelog();
         return EXIT_FAILURE;
     }
 
