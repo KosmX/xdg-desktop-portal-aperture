@@ -11,6 +11,7 @@
 #include <QSettings>
 #include <memory>
 
+using QConfig = QMap<QString, QVariantMap>;
 
 namespace aperture {
 
@@ -20,10 +21,12 @@ namespace aperture {
 
     private:
         std::unique_ptr<QSettings> settingsFile = std::make_unique<QSettings>();
-        std::unique_ptr<QMap<QString, QVariant>> config = std::make_unique<QMap<QString, QVariant>>();
+        std::unique_ptr<QConfig> config;
     public:
         DesktopPortal();
-        const std::unique_ptr<QMap<QString, QVariant>> &getSettings();
+        const std::unique_ptr<QConfig> &getSettings();
+
+        static std::unique_ptr<QConfig> qSettingsToConfig(QSettings& settings);
 
     //public slots:
 

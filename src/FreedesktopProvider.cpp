@@ -6,6 +6,7 @@
 #include <QLatin1StringView>
 #include <QtDBus/QDBusArgument>
 #include <QtDBus/QDBusMetaType>
+#include <QtGui/QTextListFormat>
 
 
 using namespace Qt::Literals::StringLiterals;
@@ -21,6 +22,9 @@ struct ColorArray {
 
     static ColorArray ofString(const QString& str) {
         auto l = str.split(",");
+        if (l.size() < 3) {
+            return {};
+        }
         return {l[0].trimmed().toDouble(), l[1].trimmed().toDouble(), l[2].trimmed().toDouble()};
     }
 };
@@ -53,10 +57,28 @@ namespace aperture {
 
     QVariant FreedesktopProvider::read(const QString &_namespace, const QString &key) {
         if (_namespace == getNamespace()) {
+            auto group = settings.getSettings().value(u"general"_s);
             if (key == colorScheme) {
-                return settings.getSettings().value(u"general.colorScheme"_s, "true").toBool() ? 1 : 2;
+                QVariant setting = group.value(u"colorScheme"_s);
+                if (setting.isNull()) {
+                    auto val = settings.getSettings()[u"Colors:Window"_s][u"BackgroundNormal"_s];
+                    if (!val.isNull()) {
+                        auto array = ColorArray::ofString(val.toString());
+                        auto gray = qGray(array.r, array.g, array.b);
+                        setting = QVariant::fromValue(gray < 192 ? u"dark"_s : ""); // lower than 192 then prefer dark
+                    }
+                }
+                return setting.isNull() ? 0 : setting.toString() == u"dark"_s ? 1 : 2;
             } else if (key == accentColor) {
-                return ColorArray::ofString(settings.getSettings().value(u"general.accentColor"_s, "1,1,1").toString());
+
+                QString setting = group.value(u"general.accentColor"_s, "").toString();
+                if (setting.isEmpty()) {
+                    auto kgroup = settings.getSettings().value(u"Colors:Selection"_s);
+                    setting = kgroup.value("BackgroundNormal", "").toString();
+                }
+                if (setting.isEmpty()) setting = u"0,114,255"_s;
+
+                return ColorArray::ofString(setting);
             }
         }
 

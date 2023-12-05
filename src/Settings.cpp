@@ -4,6 +4,7 @@
 
 #include "Settings.h"
 #include "FreedesktopProvider.h"
+#include "KdeProvider.h"
 
 #include <QtDBus/QDBusContext>
 #include <QtDBus/QDBusMessage>
@@ -24,6 +25,7 @@ namespace aperture {
     Settings::Settings(DesktopPortal *parent): QDBusAbstractAdaptor(parent), portal(parent) {
 
         providers.push_back(std::make_unique<FreedesktopProvider>(*this));
+        providers.push_back(std::make_unique<KdeProvider>(*this));
 
         qDBusRegisterMetaType<QMap<QString, QVariantMap>>();
     }
@@ -34,7 +36,7 @@ namespace aperture {
         bool messageSent = false;
 
         for(auto& provider : providers) {
-            if (provider->getNamespace().startsWith(_namespace)) {
+            if (_namespace.startsWith(provider->getNamespace())) {
 
                 auto value = provider->read(_namespace, key);
                 if (!value.isNull()) {

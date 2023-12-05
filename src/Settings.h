@@ -18,6 +18,8 @@ namespace aperture {
 
     class Settings;
 
+    bool namespaceContains(const QStringList& namespaces, const QString& _namespace);
+
     class SettingsProvider : public QObject {
         Q_OBJECT
     public:
@@ -47,7 +49,7 @@ namespace aperture {
             return 1;
         }
 
-        [[nodiscard]] const QMap<QString, QVariant>& getSettings() const {
+        [[nodiscard]] const QConfig& getSettings() const {
             return *(portal->getSettings());
         }
 
