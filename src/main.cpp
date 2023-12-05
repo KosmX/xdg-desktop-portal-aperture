@@ -6,6 +6,30 @@
 #include "DesktopPortal.h"
 #include "Settings.h"
 
+// Handler for Qt log messages that sends output to syslog as well as standard error.
+void SyslogMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+    Q_UNUSED(context)
+
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+        case QtDebugMsg:
+            syslog(LOG_DEBUG, "%s", localMsg.constData());
+            break;
+        case QtInfoMsg:
+            syslog(LOG_INFO, "%s", localMsg.constData());
+            break;
+        case QtWarningMsg:
+            syslog(LOG_WARNING, "%s", localMsg.constData());
+            break;
+        case QtCriticalMsg:
+            syslog(LOG_CRIT, "%s", localMsg.constData());
+            break;
+        case QtFatalMsg:
+            syslog(LOG_ALERT, "%s", localMsg.constData());
+            break;
+    }
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -15,10 +39,10 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }//*/
 
-    qputenv("QT_LOGGING_TO_CONSOLE", QByteArray("0"));
 
     openlog("xdg-desktop-portal-aperture", LOG_PID, LOG_DAEMON);
 
+    qInstallMessageHandler(SyslogMessageHandler);
     syslog(LOG_DEBUG, "Starting daemon");
 
     QCoreApplication a(argc, argv);
