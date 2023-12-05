@@ -34,9 +34,12 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    syslog(LOG_DEBUG, "Session bus connection OK");
+
     aperture::DesktopPortal portal{};
     aperture::Settings settings{&portal};
 
+    syslog(LOG_DEBUG, "Config loaded, registering DBus service");
 
     connection.registerObject("/org/freedesktop/portal/desktop", &portal);
     if(!connection.registerService("org.freedesktop.impl.portal.desktop.aperture")) {
