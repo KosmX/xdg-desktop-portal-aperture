@@ -69,7 +69,7 @@ namespace aperture {
                         setting = QVariant::fromValue(gray < 192 ? u"dark"_s : ""); // lower than 192 then prefer dark
                     }
                 }
-                return setting.isNull() ? 0 : setting.toString() == u"dark"_s ? 1 : 2;
+                return setting.isNull() ? 0u : setting.toString() == u"dark"_s ? 1u : 2u;
             } else if (key == accentColor) {
 
                 QString setting = group.value(u"general.accentColor"_s, "").toString();
